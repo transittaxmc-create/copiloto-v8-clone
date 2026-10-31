@@ -34,8 +34,8 @@ export const PLATFORM_META: Record<Platform, PlatformMeta> = {
   },
   "Classic Ryde": {
     logo: "/logos/classic-ryde.png",
-    badge: "VOUCHER",
-    badgeClass: "border-orange-400/60 text-orange-400",
+    badge: "ACCESS-A-RIDE",
+    badgeClass: "border-sky-400/60 text-sky-400",
     voucher: true,
   },
   "Aventus Ride": {
