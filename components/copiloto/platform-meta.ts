@@ -18,34 +18,34 @@ export type PlatformMeta = {
 }
 
 export const PLATFORM_META: Record<Platform, PlatformMeta> = {
-  Uber: { logo: "/logos/uber.jpg" },
-  Lyft: { logo: "/logos/lyft.jpg" },
+  Uber: { logo: "/logos/uber-lyft.png" },
+  Lyft: { logo: "/logos/uber-lyft.png" },
   Limosys: {},
   "Eco Ride": {
-    logo: "/logos/eco-ride.jpg",
+    logo: "/logos/eco-ride.png",
     badge: "ACCESS-A-RIDE",
     badgeClass: "border-sky-400/60 text-sky-400",
   },
-  Throo: { logo: "/logos/throo.jpg" },
+  Throo: { logo: "/logos/throo.png" },
   "AKI Technology": {
-    logo: "/logos/aki-technology.jpg",
+    logo: "/logos/aki.png",
     badge: "ACCESS-A-RIDE",
     badgeClass: "border-sky-400/60 text-sky-400",
   },
   "Classic Ryde": {
-    logo: "/logos/classic-ryde.jpg",
+    logo: "/logos/classic-ryde.png",
     badge: "VOUCHER",
     badgeClass: "border-orange-400/60 text-orange-400",
     voucher: true,
   },
   "Aventus Ride": {
-    logo: "/logos/aventus-ride.jpg",
+    logo: "/logos/aventus-ride.png",
     badge: "VOUCHER",
     badgeClass: "border-orange-400/60 text-orange-400",
     voucher: true,
   },
   "Island City Transit": {
-    logo: "/logos/island-city.jpg",
+    logo: "/logos/island-city.png",
     badge: "SQUARE",
     badgeClass: "border-emerald-400/60 text-emerald-400",
   },
