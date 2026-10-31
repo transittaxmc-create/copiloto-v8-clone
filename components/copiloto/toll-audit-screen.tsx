@@ -219,7 +219,7 @@ export function TollAuditScreen({ trips }: { trips: Trip[] }) {
           {gpsTolls.length === 0 ? (
             <p className="text-[11px] text-neutral-600">No tolls detected yet. They appear automatically when you drive through one with the shift on.</p>
           ) : (
-            <div className="max-h-44 space-y-1 overflow-y-auto">
+            <div className="max-h-72 space-y-1 overflow-y-auto">
               {gpsTolls.map((g) => (
                 <div key={g.id} className="flex items-center justify-between gap-2 text-[11px]">
                   <span className="min-w-0 flex-1 truncate text-neutral-300">
