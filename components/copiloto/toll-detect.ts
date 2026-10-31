@@ -105,11 +105,12 @@ export function tollNoteStamp(date: Date): string {
 /** "[Oct 29 · 09:15] GW Bridge - $14.00" or "[Oct 29 · 09:15] NJTPK Exit 14 — check E-ZPass statement" */
 export function formatTollNote(plaza: TollPlaza, date: Date): { text: string; amount: number | null } {
   const stamp = tollNoteStamp(date)
+  const time = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })
   const rate = rateFor(plaza, date)
   if (rate == null) {
-    return { text: `[${stamp}] ${plaza.name} — check E-ZPass statement`, amount: null }
+    return { text: `[${stamp}] ${plaza.name} @ ${time} — check E-ZPass statement`, amount: null }
   }
-  return { text: `[${stamp}] ${plaza.name} - $${rate.toFixed(2)}`, amount: rate }
+  return { text: `[${stamp}] ${plaza.name} @ ${time} - $${rate.toFixed(2)}`, amount: rate }
 }
 
 export function appendNote(existing: string | undefined, addition: string): string {
