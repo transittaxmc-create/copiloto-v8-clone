@@ -429,20 +429,20 @@ export function EntryScreen({
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-black text-white">
       {/* Header */}
-      <div className="shrink-0 px-4 pt-1 pb-1">
+      <div className="shrink-0 px-4 pt-0.5 pb-0.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-500">
-              <svg className="size-6 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L4 6v6c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-500">
+              <svg className="size-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L4 6v6c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>
             </div>
-            <h1 className="text-2xl font-bold">Copiloto <span className="text-lime-400">V8</span></h1>
+            <h1 className="text-xl font-bold">Copiloto <span className="text-lime-400">V8</span></h1>
           </div>
           <div className="flex items-center gap-1 rounded-full border border-lime-500/50 bg-lime-500/10 px-2.5 py-1 text-[11px] font-semibold text-lime-400">
             <span className="size-1.5 rounded-full bg-lime-400" />
             {place ? "GPS ready" : "Locating"}
           </div>
         </div>
-        <p className="mt-1 text-xl font-bold leading-tight">{greeting}</p>
+        <p className="mt-0.5 text-lg font-bold leading-tight">{greeting}</p>
         <p className="text-sm text-neutral-500">Drive safe. Earn smart.</p>
         <p className="mt-0.5 flex items-center gap-1 text-xs text-neutral-400" suppressHydrationWarning>
           <MapPin className="size-3 text-lime-400" />
@@ -458,7 +458,7 @@ export function EntryScreen({
       </div>
 
       {/* Platform */}
-      <div className="mx-4 mb-2 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
+      <div className="mx-4 mb-1.5 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
         <button type="button" onClick={() => setPlatformOpen((o) => !o)} className="flex w-full items-center justify-between">
           <div className="flex items-center gap-2.5">
             <PlatformAvatar platform={draft.platform} size={32} />
@@ -481,7 +481,7 @@ export function EntryScreen({
       </div>
 
       {/* Earnings - 5 cards with icons */}
-      <div className="mx-4 mb-2 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
+      <div className="mx-4 mb-1.5 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">Today's earnings</p>
           <p className="text-[9px] text-neutral-600">All values in USD</p>
@@ -504,7 +504,7 @@ export function EntryScreen({
       </div>
 
       {/* Locations */}
-      <div className="mx-4 mb-2 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
+      <div className="mx-4 mb-1.5 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
         <div className="mb-2 flex items-center gap-1.5">
           <MapPin className="size-3.5 text-cyan-400" />
           <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">Locations</p>
@@ -534,7 +534,7 @@ export function EntryScreen({
       </div>
 
       {/* Actions */}
-      <div className="mx-4 mb-3 grid grid-cols-5 gap-2">
+      <div className="mx-4 mb-1.5 grid grid-cols-5 gap-2">
         <button type="button" onClick={handleSave} className="col-span-3 flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-3.5 text-sm font-bold text-black">
           <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
           Save trip
@@ -552,7 +552,7 @@ export function EntryScreen({
       {tollFlash && <p className="mx-4 mb-2 rounded-xl bg-amber-500/10 px-3 py-2 text-sm text-amber-300">{tollFlash}</p>}
       {geoError && <p className="mx-4 mb-2 rounded-xl bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{geoError}</p>}
       {/* Shift - bottom, used rarely */}
-      <div className="mx-4 mb-2 flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2">
+      <div className="mx-4 mb-1.5 flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900">
             <svg className="size-3.5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
