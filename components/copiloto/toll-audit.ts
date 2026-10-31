@@ -177,7 +177,8 @@ export function dedupeByRef(charges: TollCharge[]): { charges: TollCharge[]; mer
  * Reconcile scanned statement charges against the GPS toll log.
  * amountTol: max |statement − gps| to still count as a match.
  * dupWindowMin: two statement charges same plaza+amount within this window = duplicate.
- * Same exact time (same minute) is always a duplicate — impossible to cross twice at once.
+ * Same exact time on the SAME DAY is a duplicate — impossible to cross twice at once.
+ * Same time on different days is possible and not flagged.
  */
 export function auditTolls(
   rawCharges: TollCharge[],
