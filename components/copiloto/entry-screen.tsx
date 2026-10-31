@@ -425,375 +425,119 @@ export function EntryScreen({
     setShowRegister((v) => !v)
   }
 
+
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
-      {/* Header FIJO (shrink-0, nunca scrollea): saludo, localización, fecha
-          y una sola fila de controles del turno, todos de la misma altura */}
-      <div className="shrink-0 px-4 pb-2 pt-2 sm:px-8 sm:pt-3">
-        <h1 className="truncate text-2xl font-bold text-white">{greeting}</h1>
-        {/* From the GPS: BARRIO · CALLE, CIUDAD */}
-        <p
-          className="mt-0.5 flex items-center gap-1.5 text-sm"
-          title={place?.address || undefined}
-          suppressHydrationWarning
-        >
-          <MapPin className="size-4 shrink-0 text-lime-400" />
-          {place ? (
-            <span className="truncate text-neutral-500">
-              {place.neighborhood ? (
-                <span className="font-semibold text-neutral-200">{place.neighborhood}</span>
-              ) : null}
-              {place.neighborhood && (place.street || place.city) ? <span> · </span> : null}
-              <span className="font-semibold text-neutral-200">{place.street || place.city}</span>
-              {place.street && place.city ? <span>, {place.city}</span> : null}
-            </span>
-          ) : (
-            <span className="truncate text-neutral-600">Looking up location…</span>
-          )}
-        </p>
-        {/* Fecha completa, pegada a la localización */}
-        <p
-          className="mt-1 whitespace-nowrap text-base font-bold text-neutral-100"
-          suppressHydrationWarning
-        >
-          {today.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
-        </p>
-        {/* Fila de controles: estado + millas a la izquierda, botones a la
-            derecha — todo a h-8, una sola línea alineada */}
-        <div className="mt-2 flex items-center gap-2.5 border-t border-neutral-800/60 pt-2">
-          {shift.shiftActive ? (
-            <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-extrabold tracking-wider text-emerald-400">
-              <span className="size-1.5 rounded-full bg-emerald-400" />
-              {shift.isOnBreak ? "ON BREAK" : "ON SHIFT"}
-            </span>
-          ) : (
-            <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-extrabold tracking-wider text-neutral-500">
-              <span className="size-1.5 rounded-full bg-neutral-600" />
-              OFF SHIFT
-            </span>
-          )}
-          {/* Contador de millas IRS — corre solo con el turno activo */}
-          {shift.shiftActive && (
-            <span
-              title="Business miles (IRS) — saved when you end the shift"
-              className="flex h-8 shrink-0 items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 font-mono text-[11px] font-bold tabular-nums text-sky-300"
-            >
-              {shift.shiftMiles.toFixed(1)} mi
-            </span>
-          )}
-          <div className="ml-auto flex shrink-0 items-center gap-2">
-            {!shift.shiftActive ? (
-              <button
-                type="button"
-                onClick={shift.onStart}
-                className="flex h-8 items-center justify-center gap-1 rounded-lg border border-emerald-500/50 bg-emerald-500/10 px-3.5 text-xs font-bold text-emerald-300"
-              >
-                <Play className="size-3" /> START
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={shift.onBreak}
-                  title={shift.isOnBreak ? "Resume the shift" : "Pause the shift"}
-                  className={cn(
-                    "flex h-8 items-center justify-center gap-1 rounded-lg border px-3.5 text-xs font-bold",
-                    shift.isOnBreak
-                      ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
-                      : "border-amber-500/50 bg-amber-500/10 text-amber-300",
-                  )}
-                >
-                  {shift.isOnBreak ? <Play className="size-3" /> : <Pause className="size-3" />}
-                  {shift.isOnBreak ? "RESUME" : "PAUSE"}
-                </button>
-                <button
-                  type="button"
-                  onClick={shift.onEnd}
-                  title="End the shift"
-                  className="flex h-8 items-center justify-center gap-1 rounded-lg border border-rose-500/50 bg-rose-500/10 px-3.5 text-xs font-bold text-rose-300"
-                >
-                  <Square className="size-3" /> END
-                </button>
-              </>
-            )}
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-black text-white">
+      {/* Header */}
+      <div className="shrink-0 px-4 pt-3 pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-lime-500/20 text-lime-400 text-sm font-bold">C</div>
+            <h1 className="text-lg font-semibold">Copiloto V8</h1>
+          </div>
+          <div className="flex items-center gap-1 rounded-full border border-lime-500/40 bg-lime-500/10 px-2.5 py-1 text-xs font-medium text-lime-400">
+            <span className="size-1.5 rounded-full bg-lime-400" />
+            {place ? "GPS ready" : "Looking…"}
           </div>
         </div>
+        <p className="mt-2 text-2xl font-semibold">{greeting}</p>
+        <p className="text-sm text-neutral-400">Drive safe. Earn smart.</p>
       </div>
 
-      {/* TODAY + REGISTER — juntos en una línea, bien cuadrado */}
-      <div className="flex shrink-0 items-stretch border-b border-neutral-800/60 bg-black sm:px-8">
-        <button
-          type="button"
-          onClick={toggleGross}
-          title={showGross ? "Tap to hide the amount" : "Tap to show the amount"}
-          className="flex flex-1 items-center justify-between gap-2 px-4 py-1.5"
-        >
-          <span className="text-[10px] font-bold tracking-[0.15em] text-emerald-300/70">TODAY</span>
-          <span className="font-mono text-base font-black tabular-nums text-emerald-300">
-            {showGross ? `$${grossIncomeToday.toFixed(2)}` : "••••••"}
-          </span>
-        </button>
-        <div className="w-px bg-neutral-800/60" />
-        <button
-          type="button"
-          onClick={toggleRegister}
-          title={showRegister ? "Tap to hide the amount" : "Tap to show the amount"}
-          className="flex flex-1 items-center justify-between gap-2 px-4 py-1.5"
-        >
-          <span className="text-[10px] font-bold tracking-[0.15em] text-sky-300/70">REGISTER</span>
-          <span className="font-mono text-base font-black tabular-nums text-sky-300">
-            {showRegister ? `$${trips.reduce((total, trip) => total + grossOf(trip), 0).toFixed(2)}` : "••••••"}
-          </span>
-        </button>
-      </div>
-
-      {/* Body: la parte de ENTRADAS (plataforma, ECONOMY, LOCATIONS) cabe
-          completa sin scroll y el header y SAVE quedan fijos fuera de este
-          div. El scroll existe SOLO para bajar a las NOTES cuando se abren
-          (aclaración de Miguel, 2026-10-26: las notas pueden quedar abajo;
-          lo que nunca puede requerir scroll es entrar datos ni salvar). */}
-      <div className="flex-1 space-y-1.5 overflow-y-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-2 sm:content-start sm:gap-4 sm:px-8 sm:py-5">
-        {/* Platform + break */}
-        <div className="flex items-center gap-2 sm:col-span-2">
-          <div className="relative flex-1">
-            <button
-              type="button"
-              onClick={() => setPlatformOpen((o) => !o)}
-              aria-haspopup="listbox"
-              aria-expanded={platformOpen}
-              className="flex w-full items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2"
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <PlatformAvatar platform={draft.platform} size={24} />
-                <span className="truncate font-semibold text-white">{draft.platform}</span>
-                <PlatformBadge platform={draft.platform} />
-              </span>
-              <ChevronDown className="size-4 shrink-0 text-neutral-500" />
+      {/* Shift card */}
+      <div className="mx-4 mb-3 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-neutral-500">Shift status</p>
+            <p className="text-sm font-semibold">
+              {!shift.shiftActive ? "OFF SHIFT" : shift.isOnBreak ? "ON BREAK" : "ON DUTY"}
+            </p>
+          </div>
+          {!shift.shiftActive ? (
+            <button type="button" onClick={shift.onStart} className="flex items-center gap-1 rounded-xl bg-lime-400 px-4 py-2.5 text-sm font-bold text-black">
+              <Play className="size-4" /> START
             </button>
-
-            {platformOpen && (
-              <div
-                role="listbox"
-                className="absolute left-0 right-0 top-full z-20 mt-1 max-h-72 overflow-y-auto rounded-xl border border-neutral-800 bg-neutral-900 shadow-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {PLATFORMS.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    role="option"
-                    aria-selected={p === draft.platform}
-                    onClick={() => {
-                      // Una plataforma de vale marca el viaje como VOUCHER sin
-                      // que el usuario tenga que tocar nada más.
-                      setDraft((d) => ({ ...d, platform: p, isVoucher: isVoucherPlatform(p) }))
-                      setPlatformOpen(false)
-                    }}
-                    className={cn(
-                      "flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm hover:bg-neutral-800",
-                      p === draft.platform ? "text-lime-400" : "text-neutral-200"
-                    )}
-                  >
-                    <PlatformAvatar platform={p} size={22} />
-                    <span className="min-w-0 flex-1 truncate">{p}</span>
-                    <PlatformBadge platform={p} />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setOnBreak((b) => !b)}
-            className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-colors",
-              onBreak
-                ? "border-orange-400 bg-orange-400/15 text-orange-400"
-                : "border-neutral-700 bg-neutral-900 text-neutral-300"
-            )}
-          >
-            <Coffee className="size-4" />
-            {onBreak ? "ON BREAK" : "BREAK/LUNCH"}
-          </button>
+          ) : (
+            <div className="flex gap-2">
+              <button type="button" onClick={shift.onBreak} className="rounded-xl border border-neutral-700 px-3 py-2 text-xs font-semibold">
+                {shift.isOnBreak ? "RESUME" : "BREAK"}
+              </button>
+              <button type="button" onClick={shift.onEnd} className="rounded-xl border border-rose-500/40 px-3 py-2 text-xs font-semibold text-rose-400">END</button>
+            </div>
+          )}
         </div>
-
-        {/* ============================================== */}
-        {/* BOX 1: ECONOMÍA — money fields */}
-        {/* ============================================== */}
-        <section className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-2 sm:col-span-2">
-          {/* Box header */}
-          <div className="mb-1.5 flex items-center gap-2">
-            <DollarSign className="size-4 text-emerald-400" />
-            <span className="text-[11px] font-bold tracking-wide text-neutral-400">ECONOMY</span>
-            <div className="ml-auto h-px flex-1 bg-neutral-800" />
-          </div>
-
-          {/* Row 1: FARE + EXTRA CASH */}
-          <div className="flex gap-2">
-            <MoneyInput
-              size="sm"
-              label="FARE"
-              color="text-green-400"
-              value={draft.earnings}
-              onChange={(n) => set("earnings", n)}
-            />
-            <MoneyInput
-              size="sm"
-              label="EXTRA CASH"
-              color="text-green-400"
-              value={draft.extraCash}
-              onChange={(n) => set("extraCash", n)}
-            />
-          </div>
-
-          {/* Row 2: TIPS + TOLLS + FEE */}
-          <div className="mt-1.5 flex gap-2">
-            <MoneyInput
-              size="sm"
-              label="TIPS"
-              color="text-green-400"
-              value={draft.tips}
-              onChange={(n) => set("tips", n)}
-            />
-            <MoneyInput
-              size="sm"
-              label="TOLLS"
-              color="text-amber-400"
-              value={draft.toll}
-              onChange={(n) => set("toll", n)}
-            />
-            <MoneyInput
-              size="sm"
-              label="FEE"
-              color="text-red-500"
-              value={draft.platformFee}
-              onChange={(n) => set("platformFee", n)}
-            />
-          </div>
-
-        </section>
-
-        {/* ============================================== */}
-        {/* BOX 3: UBICACIONES — PICKUP + DROPOFF              */}
-        {/* ============================================== */}
-        <section className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-2.5 sm:col-span-2">
-          {/* Box header */}
-          <div className="mb-2 flex items-center gap-2">
-            <MapPin className="size-4 text-green-400" />
-            <span className="text-[11px] font-bold tracking-wide text-neutral-400">LOCATIONS</span>
-            <div className="ml-auto h-px flex-1 bg-neutral-800" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <LocationColumn
-              label="PICKUP"
-              accent="green"
-              loc={draft.pickupLoc}
-              value={draft.pickup}
-              busy={capturing === "pickup"}
-              disabled={capturing !== null}
-              lowAccuracy={lowAccuracy?.which === "pickup" ? lowAccuracy : null}
-              onCapture={() => capture("pickup")}
-              onManual={(val) => set("pickup", val)}
-              onClear={() => clearLoc("pickup")}
-              onConfirmManual={() => confirmManual("pickup")}
-            />
-            <LocationColumn
-              label="DROPOFF"
-              accent="sky"
-              loc={draft.dropoffLoc}
-              value={draft.dropoff}
-              busy={capturing === "dropoff"}
-              disabled={capturing !== null}
-              lowAccuracy={lowAccuracy?.which === "dropoff" ? lowAccuracy : null}
-              onCapture={() => capture("dropoff")}
-              onManual={(val) => set("dropoff", val)}
-              onClear={() => clearLoc("dropoff")}
-              onConfirmManual={() => confirmManual("dropoff")}
-            />
-          </div>
-          {geoError && (
-            <p className="mt-2 text-center text-[11px] font-semibold text-rose-400">{geoError}</p>
-          )}
-        </section>
-
-        {/* BOX 4: NOTAS — colapsada por defecto para que TODO quepa sin
-            scroll; se abre tocando el encabezado. El aviso de peaje (tollFlash)
-            se ve siempre. */}
-        <section className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-2.5 sm:col-span-2">
-          <button
-            type="button"
-            onClick={() => setNotesOpen((v) => !v)}
-            className="flex w-full items-center gap-2"
-            aria-expanded={notesOpen}
-          >
-            <Edit2 className="size-4 text-neutral-400" />
-            <span className="text-[11px] font-bold tracking-wide text-neutral-400">NOTES</span>
-            {draft.notes ? <span className="size-1.5 rounded-full bg-sky-400" /> : null}
-            <div className="ml-1 h-px flex-1 bg-neutral-800" />
-            <ChevronDown className={cn("size-4 shrink-0 text-neutral-500 transition-transform", notesOpen && "rotate-180")} />
-          </button>
-          {tollFlash && (
-            <p className="mt-2 rounded-lg bg-sky-950/60 px-2 py-1 text-[11px] font-semibold text-sky-300">{tollFlash}</p>
-          )}
-          {notesOpen && (
-            <textarea
-              value={draft.notes || ""}
-              onChange={(e) => set("notes", e.target.value)}
-              rows={2}
-              placeholder="Toll breakdown appears here automatically…"
-              className="mt-2 w-full resize-none rounded-xl border border-neutral-800 bg-black px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none"
-            />
-          )}
-        </section>
-
       </div>
 
-      {/* Contador acumulativo de peajes (Miguel, 2026-10-29): fijo abajo,
-          siempre visible sin scroll. Se suma solo con cada pasada — de los
-          trabajos, del viaje abierto y del diario del turno. */}
-      <div className="shrink-0 border-t border-neutral-800 bg-neutral-950 px-4 py-1.5 sm:px-8">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[10px] font-bold tracking-[0.15em] text-neutral-400">
-            🛣️ TOLLS TODAY
-          </span>
-          <span className="font-mono text-[13px] font-bold tabular-nums text-neutral-100">
-            ${tollsTodayMoney.toFixed(2)}
-            <span className="ml-1.5 text-[10.5px] font-semibold text-neutral-400">
-              · {tollsTodayPasses} {tollsTodayPasses === 1 ? "PASS" : "PASSES"}
-            </span>
-          </span>
-          <span className="text-[10px] font-bold tracking-[0.15em] text-neutral-400">WEEK</span>
-          <span className="font-mono text-[13px] font-bold tabular-nums text-neutral-100">
-            ${tollsWeekMoney.toFixed(2)}
-          </span>
-        </div>
-        {lastDiaryPass && (
-          <p className="mt-0.5 truncate text-right text-[10px] text-sky-300/80">
-            Last between-jobs pass: {lastDiaryPass.time} · {lastDiaryPass.plaza}
-            {lastDiaryPass.amount != null ? ` · $${lastDiaryPass.amount.toFixed(2)}` : ""} — saved to today's diary
-          </p>
+      {/* Platform */}
+      <div className="mx-4 mb-3 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-3">
+        <p className="text-[10px] uppercase tracking-wider text-neutral-500">Platform</p>
+        <button type="button" onClick={() => setPlatformOpen((o) => !o)} className="mt-1 flex w-full items-center justify-between rounded-xl border border-neutral-800 bg-black/40 px-3 py-2.5">
+          <span className="flex items-center gap-2 font-semibold">{draft.platform}</span>
+          <ChevronDown className="size-4 text-neutral-500" />
+        </button>
+        {platformOpen && (
+          <div className="mt-1 max-h-48 overflow-y-auto rounded-xl border border-neutral-800 bg-neutral-900">
+            {PLATFORMS.map((p) => (
+              <button key={p} type="button" onClick={() => { setDraft((d) => ({ ...d, platform: p, isVoucher: isVoucherPlatform(p) })); setPlatformOpen(false); }} className={cn("flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-neutral-800", p === draft.platform && "bg-lime-500/10 text-lime-400")}>
+                {p}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Sticky record button con calidad y feedback */}
-      <div className="shrink-0 border-t border-neutral-800 bg-black px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-2 sm:px-8 sm:py-5">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!!lowAccuracy}
-          className={cn(
-            "w-full rounded-2xl py-3 text-base font-extrabold tracking-wide transition-all",
-            storageSaved
-              ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20"
-              : lowAccuracy
-              ? "cursor-not-allowed bg-neutral-800 text-neutral-500 border border-neutral-700"
-              : "bg-gradient-to-r from-yellow-500 to-amber-500 text-black active:scale-[0.99]"
-          )}
-        >
-          {storageSaved ? "STORAGE OK ✓" : lowAccuracy ? "⚠️ FIX GPS FIRST" : "+ SAVE TO DISK"}
+      {/* Money fields - compact row */}
+      <div className="mx-4 mb-3 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-[10px] uppercase tracking-wider text-neutral-500">Today's earnings</p>
+          <p className="text-[10px] text-neutral-500">All values in USD</p>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5 text-center">
+          <MoneyInput size="sm" label="FARE" color="text-lime-400" value={draft.earnings} onChange={(n) => set("earnings", n)} />
+          <MoneyInput size="sm" label="TIPS" color="text-lime-400" value={draft.tips} onChange={(n) => set("tips", n)} />
+          <MoneyInput size="sm" label="TOLLS" color="text-amber-400" value={draft.toll} onChange={(n) => set("toll", n)} />
+          <MoneyInput size="sm" label="FEE" color="text-rose-400" value={draft.platformFee} onChange={(n) => set("platformFee", n)} />
+          <MoneyInput size="sm" label="EXTRA" color="text-lime-400" value={draft.extraCash} onChange={(n) => set("extraCash", n)} />
+        </div>
+      </div>
+
+      {/* Locations */}
+      <div className="mx-4 mb-3 flex-1 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-3">
+        <p className="mb-2 text-[10px] uppercase tracking-wider text-neutral-500">Locations</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <input value={draft.pickup} onChange={(e) => set("pickup", e.target.value)} placeholder="Pickup" className="w-full rounded-xl border border-neutral-800 bg-black/40 px-3 py-2 text-sm outline-none focus:border-lime-500/50" />
+            <button type="button" onClick={() => capture("pickup")} disabled={capturing !== null} className="mt-1.5 flex w-full items-center justify-center gap-1 rounded-xl bg-lime-400 py-2.5 text-sm font-bold text-black disabled:opacity-50">
+              <MapPin className="size-4" /> {capturing === "pickup" ? "..." : "PICKUP NOW"}
+            </button>
+          </div>
+          <div>
+            <input value={draft.dropoff} onChange={(e) => set("dropoff", e.target.value)} placeholder="Dropoff" className="w-full rounded-xl border border-neutral-800 bg-black/40 px-3 py-2 text-sm outline-none focus:border-cyan-500/50" />
+            <button type="button" onClick={() => capture("dropoff")} disabled={capturing !== null} className="mt-1.5 flex w-full items-center justify-center gap-1 rounded-xl bg-cyan-400 py-2.5 text-sm font-bold text-black disabled:opacity-50">
+              <MapPin className="size-4" /> {capturing === "dropoff" ? "..." : "DROPOFF NOW"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Save */}
+      <div className="mx-4 mb-3 grid grid-cols-5 gap-2">
+        <button type="button" onClick={handleSave} className="col-span-3 flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-3.5 text-sm font-bold text-black">
+          Save trip
+        </button>
+        <button type="button" onClick={() => setNotesOpen((o) => !o)} className="col-span-2 rounded-2xl border border-neutral-700 py-3.5 text-sm font-semibold text-neutral-300">
+          Notes
         </button>
       </div>
+
+      {notesOpen && (
+        <div className="mx-4 mb-3">
+          <textarea value={draft.notes || ""} onChange={(e) => set("notes", e.target.value)} rows={2} placeholder="Notes" className="w-full resize-none rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm outline-none" />
+        </div>
+      )}
+
+      {tollFlash && <p className="mx-4 mb-2 rounded-xl bg-amber-500/10 px-3 py-2 text-sm text-amber-300">{tollFlash}</p>}
+      {geoError && <p className="mx-4 mb-2 rounded-xl bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{geoError}</p>}
     </div>
   )
 }
