@@ -48,7 +48,7 @@ export function FinanceScreen(props: {
   }, [])
   return (
     <div
-      className="flex h-full flex-col bg-[#0a0a0f]"
+      className="flex h-full flex-col bg-black"
       style={{
         backgroundImage:
           "radial-gradient(1200px 600px at 50% -10%, rgba(91,140,255,.10), transparent 60%), radial-gradient(900px 500px at 90% 10%, rgba(124,92,255,.08), transparent 55%)",

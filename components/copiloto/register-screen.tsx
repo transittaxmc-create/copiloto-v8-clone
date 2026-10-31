@@ -415,10 +415,10 @@ export function RegisterScreen({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="shrink-0 border-b border-neutral-800 bg-black/95 px-4 pb-2.5 pt-3 backdrop-blur">
+      <header className="shrink-0 border-b border-neutral-800/80 bg-black px-4 pb-2.5 pt-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
-            <h1 className="text-sm font-bold tracking-widest text-neutral-400">REGISTER</h1>
+            <h1 className="text-base font-bold text-white">Earnings</h1>
             <span
               className={cn(
                 "shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold",
