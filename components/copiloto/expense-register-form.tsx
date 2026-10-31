@@ -1,0 +1,115 @@
+// Formulario de registro rápido de gastos operativos (estilo Claris).
+// PUERTA ÚNICA: el gasto manual cae al Libro Mayor (un solo libro).
+// El plan semanal (finance-store) conserva sus ajustes internos.
+
+"use client"
+
+import { useState } from "react"
+import { cn } from "@/lib/utils"
+import { FINANCE_EXPENSE_CATEGORIES, useFinance, type FinanceExpenseCategory } from "./finance-store"
+import { LEDGER_KEY, upsertMovimiento } from "./cash-flow-store"
+import type { CashFlowEntry } from "./types"
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export function ExpenseRegisterForm() {
+  const { addExpense, loggedExpenses } = useFinance()
+  const [category, setCategory] = useState<FinanceExpenseCategory>("Combustible")
+  const [amount, setAmount] = useState("")
+  const [note, setNote] = useState("")
+
+  const submit = () => {
+    const value = parseFloat(amount)
+    if (!value || value <= 0) return
+    // 1) Libro único: el gasto nace en el Libro Mayor (no se digita dos veces).
+    const entry: CashFlowEntry = {
+      id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `g-${Date.now()}`,
+      date: todayIso(),
+      description: note?.trim() || category,
+      source: "manual",
+      sourceLabel: "Manual",
+      type: "expense",
+      status: "actual",
+      amount: Math.round(value * 100) / 100,
+      category,
+      notes: note || undefined,
+      createdAt: new Date().toISOString(),
+    }
+    try {
+      const raw = localStorage.getItem(LEDGER_KEY)
+      const list: CashFlowEntry[] = raw ? JSON.parse(raw) : []
+      localStorage.setItem(LEDGER_KEY, JSON.stringify(upsertMovimiento(Array.isArray(list) ? list : [], entry)))
+    } catch {}
+    // 2) Plan semanal: mantiene sus ajustes internos (saldo operativo y reserva).
+    addExpense({ category, amount: value, note: note || undefined })
+    setAmount("")
+    setNote("")
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-2">
+        {FINANCE_EXPENSE_CATEGORIES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setCategory(c)}
+            className={cn(
+              "rounded-xl border px-2 py-2 text-xs font-semibold transition-colors",
+              category === c
+                ? "border-lime-400/60 bg-lime-400/10 text-yellow-300"
+                : "border-neutral-700 bg-neutral-800 text-neutral-300",
+            )}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+
+      <input
+        type="number"
+        inputMode="decimal"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="Amount $"
+        className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+      />
+      <input
+        type="text"
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Note (optional)"
+        className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+      />
+
+      <button
+        type="button"
+        onClick={submit}
+        className="w-full rounded-xl bg-lime-400 py-2.5 font-bold text-black"
+      >
+        Record expense
+      </button>
+
+      <p className="text-[10px] text-neutral-500">
+        Goes straight to the Ledger (one book). Deducted from the operating balance, setting aside 10% for the contingency reserve.
+      </p>
+
+      {loggedExpenses.length > 0 && (
+        <div className="space-y-1.5 border-t border-neutral-800 pt-2">
+          {loggedExpenses
+            .slice()
+            .reverse()
+            .slice(0, 8)
+            .map((e) => (
+              <div key={e.id} className="flex justify-between text-xs">
+                <span className="text-neutral-400">{e.category}</span>
+                <span className="font-semibold text-rose-400">-${e.amount.toFixed(2)}</span>
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,0 +1,165 @@
+// app/api/bank/snapshot/route.ts
+// Prefer direct Plaid when configured + linked; otherwise proxy to legacy feed.
+//
+// FIX 2026-10-22 (root cause de "0 mov." en Copiloto):
+// fromSupabase() lee la tabla legacy `app_state` (id='register'), cuyos
+// movimientos usan `account` y `description` — NO `bank_account` ni `detail`.
+// El frontend (movementCounts, txsForAccount, bumpMove, reconciliación)
+// hace match por `t.bank_account`, así que nada coincidía: todas las cuentas
+// marcaban "0 mov." y los registers abrían vacíos aunque el sync trajera datos.
+// Este parche normaliza cada movimiento al formato BankTx que espera el
+// frontend: { date, bank_account, detail, category, amount (con signo),
+// daily_balance }. Los montos legacy ya vienen con signo (gasto negativo).
+import { NextResponse } from "next/server"
+import { listPlaidItems, plaidConfigured } from "@/lib/plaid"
+
+async function fromSupabase(): Promise<Response | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  try {
+    const r = await fetch(`${url}/rest/v1/app_state?id=eq.register&select=data`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+      cache: "no-store",
+    })
+    if (!r.ok) return null
+    const rows = await r.json()
+    if (!rows?.length) return null
+    const rawTxns = rows[0]?.data?.transactions || []
+    // Filas que Plaid retiró (duplicados/reemplazadas): el sync las marca
+    // status="ignored" pero seguían mostrándose en los registers — ej. un
+    // +$15 duplicado en la Checking 0817 (2026-10-24). Fuera del snapshot.
+    const liveTxns = rawTxns.filter((t: any) => t?.status !== "ignored")
+    // Normalizar al formato BankTx del frontend. Sin `bank_account` el match
+    // por cuenta falla y los registers salen vacíos ("0 mov.").
+    const txns = liveTxns.map((t: any) => ({
+      date: String(t.date || "").slice(0, 10),
+      bank_account: t.account || t.bankRef || "unknown",
+      detail: t.description || t.merchant || "",
+      category: t.category || null,
+      notes: typeof t.notes === "string" ? t.notes : "",
+      ts: typeof t.ts === "string" ? t.ts : "",
+      amount: Number(t.amount) || 0,
+      daily_balance: null,
+      transaction_id: t.bankRef || t.id || null,
+      pending: t.pending === true || t.status === "pending",
+    }))
+    // Leer balances frescos
+    let balMap: Record<string, number> = {}
+    let maskByName: Record<string, string> = {}
+    let balOk = false
+    try {
+      const bRes = await fetch(`${url}/rest/v1/app_state?id=eq.balances&select=data`, {
+        headers: { apikey: key, Authorization: `Bearer ${key}` },
+        cache: "no-store",
+      })
+      if (bRes.ok) {
+        const bRows = await bRes.json()
+        const bals = bRows[0]?.data?.balances || {}
+        const bestAbs: Record<string, number> = {}
+        for (const [k, v] of Object.entries(bals) as any) {
+          if (typeof v.current !== "number") continue
+          // Dos cuentas pueden compartir nombre (Access Account …3830 y …6393):
+          // el balance del bucket es la SUMA, si no se pierde dinero.
+          balMap[v.name] = (balMap[v.name] ?? 0) + v.current
+          if (v.mask) balMap[`${v.name} …${v.mask}`] = v.current
+          // Máscara visible del bucket: la de mayor balance (en Access, la
+          // principal …6393) — para que la tarjeta enseñe nombre + 4 números.
+          if (v.mask && Math.abs(v.current) >= (bestAbs[v.name] ?? -1)) {
+            bestAbs[v.name] = Math.abs(v.current)
+            maskByName[v.name] = String(v.mask)
+          }
+        }
+        balOk = Object.keys(balMap).length > 0
+      }
+    } catch {}
+    // Mapear al formato del snapshot
+    const accounts: Record<string, any> = {}
+    let total = 0
+    for (const t of txns) {
+      const acct = t.bank_account || "unknown"
+      if (!accounts[acct]) {
+        // Cuenta fantasma: tiene movimientos viejos pero ya no existe en
+        // los balances de Plaid (ej. Varo desconectado) — no se muestra.
+        if (balOk && !(acct in balMap)) continue
+        const bal = balMap[acct] ?? 0
+        accounts[acct] = { name: acct, current_balance: bal, mask: maskByName[acct] ?? null, transactions: [] }
+        total += bal
+      }
+      accounts[acct].transactions.push(t)
+    }
+    // Cuentas con balance pero sin movimientos en el registro: incluirlas
+    // para que el total cuadre con Plaid.
+    if (balOk) {
+      for (const [name, bal] of Object.entries(balMap)) {
+        if (name.includes("…")) continue
+        if (!accounts[name]) {
+          accounts[name] = { name, current_balance: bal, mask: maskByName[name] ?? null, transactions: [] }
+          total += bal
+        }
+      }
+    }
+    return NextResponse.json({
+      as_of: new Date().toISOString(),
+      total_balance: total,
+      accounts: Object.values(accounts),
+      transactions: txns,
+      source: "supabase",
+    }, { headers: { "Cache-Control": "no-store" } })
+  } catch { return null }
+}
+
+export const dynamic = "force-dynamic"
+
+const UPSTREAM = "https://islandcity-register1.vercel.app/api/bank/snapshot"
+
+async function fromPlaid(): Promise<Response | null> {
+  if (!plaidConfigured()) return null
+  const items = await listPlaidItems()
+  if (!items.length) return null
+  // Same-origin internal call keeps one code path for mapping.
+  const origin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"
+  try {
+    const r = await fetch(`${origin}/api/plaid/sync`, { cache: "no-store" })
+    if (!r.ok) return null
+    const body = await r.text()
+    return new NextResponse(body, {
+      status: 200,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    })
+  } catch { return null }
+}
+
+export async function GET() {
+  // Supabase primero: tiene los datos completos del daily sync (7 cuentas).
+  // Plaid directo (via plaid_items) puede estar incompleto si no se conectaron todos los bancos en el app.
+  const sbRes = await fromSupabase()
+  if (sbRes) return sbRes
+
+  const plaidRes = await fromPlaid()
+  if (plaidRes) return plaidRes
+
+  // Legacy proxy (BANK_FEED_KEY) — still works until Plaid is linked.
+  const ctrl = new AbortController()
+  const t = setTimeout(() => ctrl.abort(), 12000)
+  try {
+    const key = process.env.BANK_FEED_KEY
+    if (!key) {
+      return NextResponse.json({ error: "bank feed not configured" }, { status: 503 })
+    }
+    const r = await fetch(`${UPSTREAM}?key=${encodeURIComponent(key)}`, {
+      cache: "no-store",
+      signal: ctrl.signal,
+    })
+    const body = await r.text()
+    return new NextResponse(body, {
+      status: r.status,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    })
+  } catch (e: any) {
+    const msg = e?.name === "AbortError" ? "bank snapshot timeout" : e?.message || "bank proxy failed"
+    return NextResponse.json({ error: msg }, { status: 502 })
+  } finally {
+    clearTimeout(t)
+  }
+}

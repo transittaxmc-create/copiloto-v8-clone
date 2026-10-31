@@ -1,0 +1,24 @@
+# v0 sandbox internal files
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+.snowflake/
+.v0-trash/
+.vercel/
+
+# Log del dev server local (proceso vivo en esta PC)
+dev-server.log
+
+# Environment variables
+.env*.local
+
+# Common ignores
+node_modules
+.next/
+.DS_Store
+
+# Generados por Next.js / TypeScript (no se editan a mano)
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+.env*
