@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { ChevronDown, MapPin, Coffee, Loader2, X, AlertTriangle, RotateCw, Edit2, DollarSign, Play, Pause, Square } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PLATFORMS, type Platform, type Trip, type LocationPoint, newTrip, grossOf, tripDateOf } from "./types"
-import { PlatformAvatar, PlatformBadge } from "./platform-avatar"
+import { PlatformAvatar } from "./platform-avatar"
 import { isVoucherPlatform } from "./platform-meta"
 import type { ShiftApi } from "./shift"
 import {
@@ -428,130 +428,156 @@ export function EntryScreen({
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-black text-white">
-      {/* Header compacto */}
-      <div className="shrink-0 px-4 pt-2 pb-1">
+      {/* Header */}
+      <div className="shrink-0 px-4 pt-3 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-lime-500 text-black text-xs font-black">C</div>
-            <span className="text-base font-bold">Copiloto <span className="text-lime-400">V8</span></span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-lime-500">
+              <svg className="size-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L4 6v6c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h1 className="text-lg font-bold">Copiloto <span className="text-lime-400">V8</span></h1>
           </div>
-          <div className="flex items-center gap-1 rounded-full border border-lime-500/40 bg-lime-500/10 px-2 py-0.5 text-[10px] font-semibold text-lime-400">
+          <div className="flex items-center gap-1 rounded-full border border-lime-500/50 bg-lime-500/10 px-2.5 py-1 text-[11px] font-semibold text-lime-400">
             <span className="size-1.5 rounded-full bg-lime-400" />
-            {place ? "GPS" : "..."}
+            {place ? "GPS ready" : "Locating"}
           </div>
         </div>
-        <p className="mt-1 text-xl font-bold">{greeting}</p>
-        <p className="flex items-center gap-1 text-sm text-neutral-400" suppressHydrationWarning>
-          <MapPin className="size-3.5 text-lime-400" />
+        <p className="mt-2.5 text-[26px] font-bold leading-tight">{greeting}</p>
+        <p className="text-sm text-neutral-500">Drive safe. Earn smart.</p>
+        <p className="mt-0.5 flex items-center gap-1 text-xs text-neutral-400" suppressHydrationWarning>
+          <MapPin className="size-3 text-lime-400" />
           {place ? (
-            <span className="truncate">
-              {place.neighborhood && <span className="font-semibold text-neutral-200">{place.neighborhood}</span>}
-              {place.neighborhood && (place.street || place.city) && " · "}
-              <span className="font-semibold text-neutral-200">{place.street || place.city}</span>
-              {place.street && place.city && <span>, {place.city}</span>}
-            </span>
+            <span className="truncate">{place.neighborhood || place.street || place.city}{place.city && place.street ? `, ${place.city}` : ""}</span>
           ) : (
-            <span className="text-neutral-600">Looking up location…</span>
+            <span>Looking up location…</span>
           )}
-        </p>
-        <p className="text-sm font-semibold text-neutral-200" suppressHydrationWarning>
-          {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+          <span className="ml-auto text-neutral-500" suppressHydrationWarning>
+            {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+          </span>
         </p>
       </div>
 
-      {/* Shift + Platform en una fila */}
-      <div className="mx-4 mb-2 grid grid-cols-2 gap-2">
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-2.5">
-          <p className="text-[9px] font-bold uppercase text-neutral-500">Shift</p>
-          <div className="mt-1 flex items-center justify-between">
-            <span className="text-xs font-bold">{!shift.shiftActive ? "OFF" : shift.isOnBreak ? "BREAK" : "ON"}</span>
-            {!shift.shiftActive ? (
-              <button type="button" onClick={shift.onStart} className="rounded-lg bg-lime-400 px-3 py-1.5 text-xs font-bold text-black">START</button>
-            ) : (
-              <button type="button" onClick={shift.onEnd} className="rounded-lg border border-rose-500/40 px-2 py-1 text-[10px] font-semibold text-rose-400">END</button>
-            )}
+      {/* Shift */}
+      <div className="mx-4 mb-2 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900">
+              <svg className="size-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">Shift status</p>
+              <p className="text-sm font-bold">{!shift.shiftActive ? "OFF SHIFT" : shift.isOnBreak ? "ON BREAK" : "ON DUTY"}</p>
+            </div>
           </div>
-        </div>
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-2.5">
-          <p className="text-[9px] font-bold uppercase text-neutral-500">Platform</p>
-          <button type="button" onClick={() => setPlatformOpen((o) => !o)} className="mt-1 flex w-full items-center justify-between text-sm font-bold">
-            {draft.platform} <ChevronDown className="size-3.5 text-neutral-500" />
-          </button>
+          {!shift.shiftActive ? (
+            <button type="button" onClick={shift.onStart} className="flex items-center gap-1.5 rounded-xl bg-lime-400 px-4 py-2.5 text-sm font-bold text-black">
+              <svg className="size-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> START
+            </button>
+          ) : (
+            <div className="flex gap-1.5">
+              <button type="button" onClick={shift.onBreak} className="rounded-lg border border-neutral-700 px-2.5 py-2 text-xs font-semibold">{shift.isOnBreak ? "RESUME" : "BREAK"}</button>
+              <button type="button" onClick={shift.onEnd} className="rounded-lg border border-rose-500/40 px-2.5 py-2 text-xs font-semibold text-rose-400">END</button>
+            </div>
+          )}
         </div>
       </div>
-      {platformOpen && (
-        <div className="mx-4 mb-2 max-h-32 overflow-y-auto rounded-xl border border-neutral-800 bg-neutral-900">
-          {PLATFORMS.map((p) => (
-            <button key={p} type="button" onClick={() => { setDraft((d) => ({ ...d, platform: p, isVoucher: isVoucherPlatform(p) })); setPlatformOpen(false); }} className={cn("flex w-full items-center px-3 py-2 text-left text-sm", p === draft.platform && "bg-lime-500/10 text-lime-400")}>{p}</button>
-          ))}
-        </div>
-      )}
 
-      {/* Money - campos grandes y claros */}
-      <div className="mx-4 mb-2 rounded-xl border border-neutral-800 bg-neutral-950 p-3">
-        <p className="mb-2 text-[9px] font-bold uppercase text-neutral-500">Earnings</p>
-        <div className="grid grid-cols-5 gap-2">
+      {/* Platform */}
+      <div className="mx-4 mb-2 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
+        <button type="button" onClick={() => setPlatformOpen((o) => !o)} className="flex w-full items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <PlatformAvatar platform={draft.platform} size={32} />
+            <div className="text-left">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">Platform</p>
+              <p className="text-sm font-bold">{draft.platform}</p>
+            </div>
+          </div>
+          <ChevronDown className="size-5 text-neutral-500" />
+        </button>
+        {platformOpen && (
+          <div className="mt-2 max-h-36 overflow-y-auto rounded-xl border border-neutral-800 bg-neutral-900">
+            {PLATFORMS.map((p) => (
+              <button key={p} type="button" onClick={() => { setDraft((d) => ({ ...d, platform: p, isVoucher: isVoucherPlatform(p) })); setPlatformOpen(false); }} className={cn("flex w-full items-center gap-2 px-3 py-2 text-left text-sm", p === draft.platform && "bg-lime-500/10 text-lime-400")}>
+                <PlatformAvatar platform={p} size={20} /> {p}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Earnings - 5 cards with icons */}
+      <div className="mx-4 mb-2 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">Today's earnings</p>
+          <p className="text-[9px] text-neutral-600">All values in USD</p>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5">
           {[
-            { label: "Fare", key: "earnings", color: "text-lime-400" },
-            { label: "Tips", key: "tips", color: "text-lime-400" },
-            { label: "Tolls", key: "toll", color: "text-amber-400" },
-            { label: "Fee", key: "platformFee", color: "text-rose-400" },
-            { label: "Extra", key: "extraCash", color: "text-lime-400" },
+            { label: "FARE", key: "earnings", color: "text-lime-400", icon: "💼", sub: "trips" },
+            { label: "TIPS", key: "tips", color: "text-lime-400", icon: "⭐", sub: "tips" },
+            { label: "TOLLS", key: "toll", color: "text-amber-400", icon: "🛣️", sub: "tolls" },
+            { label: "FEE", key: "platformFee", color: "text-cyan-400", icon: "%", sub: "fee" },
+            { label: "EXTRA", key: "extraCash", color: "text-lime-400", icon: "$", sub: "cash" },
           ].map((f) => (
-            <div key={f.key}>
-              <p className="mb-1 text-center text-[10px] font-semibold text-neutral-400">{f.label}</p>
-              <input
-                type="number"
-                step="0.01"
-                inputMode="decimal"
-                value={(draft as any)[f.key] || ""}
-                onChange={(e) => set(f.key as any, Number(e.target.value) || 0)}
-                className={cn("w-full rounded-lg border border-neutral-700 bg-black py-2 text-center text-base font-bold outline-none focus:border-lime-500", f.color)}
-                placeholder="0"
-              />
+            <div key={f.key} className="rounded-xl border border-neutral-800 bg-black/50 p-1.5 text-center">
+              <div className="text-sm">{f.icon}</div>
+              <p className="text-[8px] font-bold uppercase text-neutral-500">{f.label}</p>
+              <input type="number" step="0.01" inputMode="decimal" value={(draft as any)[f.key] || ""} onChange={(e) => set(f.key as any, Number(e.target.value) || 0)} className={cn("mt-0.5 w-full bg-transparent text-center text-sm font-bold outline-none", f.color)} placeholder="$0" />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Locations - inputs claros */}
-      <div className="mx-4 mb-2 flex-1 rounded-xl border border-neutral-800 bg-neutral-950 p-3">
-        <p className="mb-2 text-[9px] font-bold uppercase text-neutral-500">Locations</p>
+      {/* Locations */}
+      <div className="mx-4 mb-2 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
+        <div className="mb-2 flex items-center gap-1.5">
+          <MapPin className="size-3.5 text-cyan-400" />
+          <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">Locations</p>
+        </div>
         <div className="space-y-2">
-          <div className="flex gap-2">
-            <input
-              value={draft.pickup}
-              onChange={(e) => set("pickup", e.target.value)}
-              placeholder="Pickup address"
-              className="flex-1 rounded-lg border border-neutral-700 bg-black px-3 py-2.5 text-sm outline-none focus:border-lime-500"
-            />
-            <button type="button" onClick={() => capture("pickup")} disabled={capturing !== null} className="shrink-0 rounded-lg bg-lime-400 px-3 py-2.5 text-xs font-bold text-black disabled:opacity-50">
-              {capturing === "pickup" ? "..." : "GPS"}
-            </button>
+          <div className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-black/40 px-3 py-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-lime-500/20 text-lime-400"><MapPin className="size-3.5" /></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] font-bold uppercase text-neutral-500">Pickup</p>
+              <input value={draft.pickup} onChange={(e) => set("pickup", e.target.value)} placeholder="Current location · Auto-detected" className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-600" />
+            </div>
           </div>
-          <div className="flex gap-2">
-            <input
-              value={draft.dropoff}
-              onChange={(e) => set("dropoff", e.target.value)}
-              placeholder="Dropoff address"
-              className="flex-1 rounded-lg border border-neutral-700 bg-black px-3 py-2.5 text-sm outline-none focus:border-cyan-500"
-            />
-            <button type="button" onClick={() => capture("dropoff")} disabled={capturing !== null} className="shrink-0 rounded-lg bg-cyan-400 px-3 py-2.5 text-xs font-bold text-black disabled:opacity-50">
-              {capturing === "dropoff" ? "..." : "GPS"}
-            </button>
+          <div className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-black/40 px-3 py-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400"><MapPin className="size-3.5" /></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] font-bold uppercase text-neutral-500">Dropoff</p>
+              <input value={draft.dropoff} onChange={(e) => set("dropoff", e.target.value)} placeholder="Enter dropoff location" className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-600" />
+            </div>
           </div>
+        </div>
+        <div className="mt-2.5 grid grid-cols-2 gap-2">
+          <button type="button" onClick={() => capture("pickup")} disabled={capturing !== null} className="flex items-center justify-center gap-1.5 rounded-xl bg-lime-400 py-3 text-sm font-bold text-black disabled:opacity-50">
+            <MapPin className="size-4" /> {capturing === "pickup" ? "..." : "PICKUP NOW"}
+          </button>
+          <button type="button" onClick={() => capture("dropoff")} disabled={capturing !== null} className="flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 py-3 text-sm font-bold text-black disabled:opacity-50">
+            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg> {capturing === "dropoff" ? "..." : "DROPOFF NOW"}
+          </button>
         </div>
       </div>
 
-      {/* Save grande */}
-      <div className="mx-4 mb-3">
-        <button type="button" onClick={handleSave} className="w-full rounded-xl bg-amber-400 py-3.5 text-base font-bold text-black">
+      {/* Actions */}
+      <div className="mx-4 mb-3 grid grid-cols-5 gap-2">
+        <button type="button" onClick={handleSave} className="col-span-3 flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-3.5 text-sm font-bold text-black">
+          <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
           Save trip
+        </button>
+        <button type="button" onClick={() => setNotesOpen((o) => !o)} className="col-span-2 flex items-center justify-center gap-1.5 rounded-2xl border border-neutral-700 py-3.5 text-sm font-semibold text-neutral-300">
+          Notes
         </button>
       </div>
 
-      {tollFlash && <p className="mx-4 mb-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300">{tollFlash}</p>}
-      {geoError && <p className="mx-4 mb-2 rounded-lg bg-rose-500/10 px-3 py-1.5 text-xs text-rose-300">{geoError}</p>}
+      {notesOpen && (
+        <div className="mx-4 mb-2">
+          <textarea value={draft.notes || ""} onChange={(e) => set("notes", e.target.value)} rows={2} placeholder="Notes" className="w-full resize-none rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm outline-none" />
+        </div>
+      )}
+      {tollFlash && <p className="mx-4 mb-2 rounded-xl bg-amber-500/10 px-3 py-2 text-sm text-amber-300">{tollFlash}</p>}
+      {geoError && <p className="mx-4 mb-2 rounded-xl bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{geoError}</p>}
     </div>
   )
 }
