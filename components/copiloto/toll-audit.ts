@@ -182,7 +182,8 @@ export function auditTolls(
   rawCharges: TollCharge[],
   gpsTolls: GpsToll[],
   amountTol = 0.6,
-  dupWindowMin = 40
+  dupWindowMin = 40,
+  timeTolMin = 15
 ): AuditResult {
   const { charges, merged } = dedupeByRef(rawCharges)
   const rows: AuditRow[] = []
@@ -202,6 +203,7 @@ export function auditTolls(
       const gt = minutesOf(g.time)
       const ct = minutesOf(c.time)
       const timeDiff = gt != null && ct != null ? Math.abs(gt - ct) : 30
+      if (timeDiff > timeTolMin) continue  // must be within time tolerance
       const score = diff * 10 + timeDiff
       if (score < bestScore) {
         bestScore = score
