@@ -441,6 +441,22 @@ export function EntryScreen({
           </div>
         </div>
         <p className="mt-1 text-xl font-bold">{greeting}</p>
+        <p className="flex items-center gap-1 text-sm text-neutral-400" suppressHydrationWarning>
+          <MapPin className="size-3.5 text-lime-400" />
+          {place ? (
+            <span className="truncate">
+              {place.neighborhood && <span className="font-semibold text-neutral-200">{place.neighborhood}</span>}
+              {place.neighborhood && (place.street || place.city) && " · "}
+              <span className="font-semibold text-neutral-200">{place.street || place.city}</span>
+              {place.street && place.city && <span>, {place.city}</span>}
+            </span>
+          ) : (
+            <span className="text-neutral-600">Looking up location…</span>
+          )}
+        </p>
+        <p className="text-sm font-semibold text-neutral-200" suppressHydrationWarning>
+          {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+        </p>
       </div>
 
       {/* Shift + Platform en una fila */}
