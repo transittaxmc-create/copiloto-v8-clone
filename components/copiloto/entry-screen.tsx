@@ -541,6 +541,9 @@ export function EntryScreen({
               <p className="text-[9px] font-bold uppercase text-neutral-500">Pickup</p>
               <input value={draft.pickup} onChange={(e) => set("pickup", e.target.value)} placeholder="Current location · Auto-detected" className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-600" />
             </div>
+            <button type="button" onClick={() => capture("pickup")} disabled={capturing !== null} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-lime-400 text-black disabled:opacity-50">
+              <MapPin className="size-4" />
+            </button>
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-neutral-800 bg-black/40 px-3 py-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400"><MapPin className="size-3.5" /></div>
@@ -548,15 +551,10 @@ export function EntryScreen({
               <p className="text-[9px] font-bold uppercase text-neutral-500">Dropoff</p>
               <input value={draft.dropoff} onChange={(e) => set("dropoff", e.target.value)} placeholder="Enter dropoff location" className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-600" />
             </div>
+            <button type="button" onClick={() => capture("dropoff")} disabled={capturing !== null} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-400 text-black disabled:opacity-50">
+              <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </button>
           </div>
-        </div>
-        <div className="mt-2.5 grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => capture("pickup")} disabled={capturing !== null} className="flex items-center justify-center gap-1.5 rounded-xl bg-lime-400 py-3 text-sm font-bold text-black disabled:opacity-50">
-            <MapPin className="size-4" /> {capturing === "pickup" ? "..." : "PICKUP NOW"}
-          </button>
-          <button type="button" onClick={() => capture("dropoff")} disabled={capturing !== null} className="flex items-center justify-center gap-1.5 rounded-xl bg-cyan-400 py-3 text-sm font-bold text-black disabled:opacity-50">
-            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg> {capturing === "dropoff" ? "..." : "DROPOFF NOW"}
-          </button>
         </div>
       </div>
 
