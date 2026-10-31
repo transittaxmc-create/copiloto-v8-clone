@@ -429,7 +429,7 @@ export function EntryScreen({
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-black text-white">
       {/* Header */}
-      <div className="shrink-0 px-4 pt-3 pb-2">
+      <div className="shrink-0 px-4 pt-1 pb-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-500">
@@ -442,7 +442,7 @@ export function EntryScreen({
             {place ? "GPS ready" : "Locating"}
           </div>
         </div>
-        <p className="mt-2 text-3xl font-bold leading-tight">{greeting}</p>
+        <p className="mt-1 text-xl font-bold leading-tight">{greeting}</p>
         <p className="text-sm text-neutral-500">Drive safe. Earn smart.</p>
         <p className="mt-0.5 flex items-center gap-1 text-xs text-neutral-400" suppressHydrationWarning>
           <MapPin className="size-3 text-lime-400" />
@@ -455,31 +455,6 @@ export function EntryScreen({
             {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
           </span>
         </p>
-      </div>
-
-      {/* Shift */}
-      <div className="mx-4 mb-2 rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900">
-              <svg className="size-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            </div>
-            <div>
-              <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-500">Shift status</p>
-              <p className="text-sm font-bold">{!shift.shiftActive ? "OFF SHIFT" : shift.isOnBreak ? "ON BREAK" : "ON DUTY"}</p>
-            </div>
-          </div>
-          {!shift.shiftActive ? (
-            <button type="button" onClick={shift.onStart} className="flex items-center gap-1.5 rounded-xl bg-lime-400 px-4 py-2.5 text-sm font-bold text-black">
-              <svg className="size-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> START
-            </button>
-          ) : (
-            <div className="flex gap-1.5">
-              <button type="button" onClick={shift.onBreak} className="rounded-lg border border-neutral-700 px-2.5 py-2 text-xs font-semibold">{shift.isOnBreak ? "RESUME" : "BREAK"}</button>
-              <button type="button" onClick={shift.onEnd} className="rounded-lg border border-rose-500/40 px-2.5 py-2 text-xs font-semibold text-rose-400">END</button>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Platform */}
@@ -576,6 +551,27 @@ export function EntryScreen({
       )}
       {tollFlash && <p className="mx-4 mb-2 rounded-xl bg-amber-500/10 px-3 py-2 text-sm text-amber-300">{tollFlash}</p>}
       {geoError && <p className="mx-4 mb-2 rounded-xl bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{geoError}</p>}
+      {/* Shift - bottom, used rarely */}
+      <div className="mx-4 mb-2 flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900">
+            <svg className="size-3.5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <span className="text-xs font-bold">{!shift.shiftActive ? "OFF SHIFT" : shift.isOnBreak ? "ON BREAK" : "ON DUTY"}</span>
+        </div>
+        {!shift.shiftActive ? (
+          <button type="button" onClick={shift.onStart} className="flex items-center gap-1 rounded-lg bg-lime-400 px-3 py-1.5 text-xs font-bold text-black">
+            <svg className="size-3" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> START
+          </button>
+        ) : (
+          <div className="flex gap-1.5">
+            <button type="button" onClick={shift.onBreak} className="rounded-lg border border-neutral-700 px-2 py-1 text-[10px] font-semibold">{shift.isOnBreak ? "RESUME" : "BREAK"}</button>
+            <button type="button" onClick={shift.onEnd} className="rounded-lg border border-rose-500/40 px-2 py-1 text-[10px] font-semibold text-rose-400">END</button>
+          </div>
+        )}
+      </div>
+
+
     </div>
   )
 }
