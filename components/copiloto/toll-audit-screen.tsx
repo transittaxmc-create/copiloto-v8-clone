@@ -223,7 +223,7 @@ export function TollAuditScreen({ trips }: { trips: Trip[] }) {
               {gpsTolls.map((g) => (
                 <div key={g.id} className="flex items-center justify-between gap-2 text-[11px]">
                   <span className="min-w-0 flex-1 truncate text-neutral-300">
-                    <span className="font-mono text-neutral-500">{g.date.slice(5)} {g.time}</span> · {g.plaza}
+                    <span className="mr-1 rounded border border-emerald-700 bg-emerald-950/60 px-1 py-px text-[8px] font-bold text-emerald-300">AUTO</span><span className="font-mono text-neutral-500">{g.date.slice(5)} {g.time}</span> · {g.plaza}
                     {g.platform === "SHIFT" && (
                       <span className="ml-1.5 rounded border border-sky-800 bg-sky-950/50 px-1 py-px align-middle text-[8.5px] font-bold tracking-wide text-sky-300">SHIFT</span>
                     )}
