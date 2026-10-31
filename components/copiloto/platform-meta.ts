@@ -45,11 +45,12 @@ export const PLATFORM_META: Record<Platform, PlatformMeta> = {
     voucher: true,
   },
   "Island City Transit": {
+    logo: "/logos/island-city.jpg",
     badge: "SQUARE",
     badgeClass: "border-emerald-400/60 text-emerald-400",
   },
-  Cash: {},
-  Other: {},
+  Cash: { logo: "/logos/cash.svg" },
+  Other: { logo: "/logos/other.svg" },
 }
 
 /** Where platform payouts typically land (cash-flow & reconciliation). */
