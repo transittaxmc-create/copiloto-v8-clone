@@ -534,12 +534,12 @@ export function EntryScreen({
       </div>
 
       {/* Actions */}
-      <div className="mx-4 mb-1.5 grid grid-cols-5 gap-2">
-        <button type="button" onClick={handleSave} className="col-span-3 flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-3.5 text-sm font-bold text-black">
+      <div className="mx-4 mb-1.5 grid grid-cols-2 gap-2">
+        <button type="button" onClick={handleSave} className="flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-3.5 text-sm font-bold text-black">
           <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
           Save trip
         </button>
-        <button type="button" onClick={() => setNotesOpen((o) => !o)} className="col-span-2 flex items-center justify-center gap-1.5 rounded-2xl border border-neutral-700 py-3.5 text-sm font-semibold text-neutral-300">
+        <button type="button" onClick={() => setNotesOpen((o) => !o)} className="flex items-center justify-center gap-1.5 rounded-2xl border border-neutral-700 py-3.5 text-sm font-semibold text-neutral-300">
           Notes
         </button>
       </div>
