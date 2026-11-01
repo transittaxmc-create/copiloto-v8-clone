@@ -706,31 +706,36 @@ export function ProyeccionFoto1(props: ProyProps & { onScan?: () => void }) {
 }
 
 function WeekCloseBar({ entries }: { entries: any[] }) {
-  // Current week (Mon-Sun) PROJECTED totals
-  const currentWeek = useMemo(() => {
+  // Closed weeks (Mon-Sun) that have ended
+  const closedWeeks = useMemo(() => {
     const now = new Date()
-    const day = now.getDay()
-    const monday = new Date(now)
-    monday.setDate(now.getDate() - ((day + 6) % 7))
-    const sunday = new Date(monday)
-    sunday.setDate(monday.getDate() + 6)
-    const start = monday.toISOString().slice(0, 10)
-    const end = sunday.toISOString().slice(0, 10)
-    let inW = 0, outW = 0, tolls = 0
+    const today = now.toISOString().slice(0, 10)
+    const byWeek = new Map<string, { in: number; out: number; tolls: number; start: string; end: string }>()
     for (const e of entries) {
       const d = String(e.date || "").slice(0, 10)
-      if (d < start || d > end) continue
+      if (!d || d > today) continue
+      const dt = new Date(d + "T12:00:00")
+      const day = dt.getDay()
+      const monday = new Date(dt)
+      monday.setDate(dt.getDate() - ((day + 6) % 7))
+      const sunday = new Date(monday)
+      sunday.setDate(monday.getDate() + 6)
+      const key = monday.toISOString().slice(0, 10)
+      const end = sunday.toISOString().slice(0, 10)
+      if (end > today) continue // week not closed yet
+      if (!byWeek.has(key)) byWeek.set(key, { in: 0, out: 0, tolls: 0, start: key, end })
+      const w = byWeek.get(key)!
       const amt = Math.abs(Number(e.amount) || 0)
-      if (e.type === "inflow" || e.type === "income") inW += amt
+      if (e.type === "inflow" || e.type === "income") w.in += amt
       else {
-        outW += amt
-        if ((e.category || "").toLowerCase().includes("toll")) tolls += amt
+        w.out += amt
+        if ((e.category || "").toLowerCase().includes("toll")) w.tolls += amt
       }
     }
-    return { start, end, in: inW, out: outW, tolls, net: inW - outW }
+    return [...byWeek.values()].sort((a, b) => b.start.localeCompare(a.start)).slice(0, 4)
   }, [entries])
 
-  // Month to date ACTUAL only
+  // Month to date ACTUAL
   const monthAcc = useMemo(() => {
     const ym = new Date().toISOString().slice(0, 7)
     let inM = 0, outM = 0
@@ -744,26 +749,27 @@ function WeekCloseBar({ entries }: { entries: any[] }) {
     return { in: inM, out: outM, net: inM - outM }
   }, [entries])
 
+  if (closedWeeks.length === 0 && monthAcc.in === 0 && monthAcc.out === 0) return null
+
   return (
-    <div style={{ margin: "6px 12px 8px", padding: "6px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", fontSize: 10, lineHeight: 1.4 }}>
-        <span style={{ color: "#52525b", fontWeight: 500, letterSpacing: 0.3 }}>{currentWeek.start.slice(5)}–{currentWeek.end.slice(5)}</span>
-        <span style={{ fontVariantNumeric: "tabular-nums", color: "#71717a" }}>
-          <span style={{ color: "#22c55e" }}>+{currentWeek.in.toFixed(0)}</span>
-          <span style={{ margin: "0 4px", color: "#3f3f46" }}>·</span>
-          <span style={{ color: "#ef4444" }}>−{currentWeek.out.toFixed(0)}</span>
-          {currentWeek.tolls > 0 && <><span style={{ margin: "0 4px", color: "#3f3f46" }}>·</span><span style={{ color: "#a1a1aa" }}>{currentWeek.tolls.toFixed(0)}</span></>}
-        </span>
-        <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: currentWeek.net >= 0 ? "#22c55e" : "#ef4444" }}>{currentWeek.net >= 0 ? "+" : ""}{currentWeek.net.toFixed(0)}</span>
-      </div>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", fontSize: 10, lineHeight: 1.4, marginTop: 2 }}>
-        <span style={{ color: "#52525b", fontWeight: 500 }}>Month</span>
-        <span style={{ fontVariantNumeric: "tabular-nums", color: "#71717a" }}>
-          <span style={{ color: "#22c55e" }}>+{monthAcc.in.toFixed(0)}</span>
-          <span style={{ margin: "0 4px", color: "#3f3f46" }}>·</span>
-          <span style={{ color: "#ef4444" }}>−{monthAcc.out.toFixed(0)}</span>
-        </span>
-        <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: monthAcc.net >= 0 ? "#22c55e" : "#ef4444" }}>{monthAcc.net >= 0 ? "+" : ""}{monthAcc.net.toFixed(0)}</span>
+    <div style={{ margin: "8px 12px", fontSize: 10 }}>
+      {closedWeeks.map((w) => {
+        const net = w.in - w.out
+        return (
+          <div key={w.start} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 8px", marginBottom: 4, borderRadius: 6, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
+            <span style={{ color: "#71717a", minWidth: 70 }}>{w.start.slice(5)}–{w.end.slice(5)}</span>
+            <span style={{ color: "#22c55e" }}>+{w.in.toFixed(0)}</span>
+            <span style={{ color: "#ef4444" }}>−{w.out.toFixed(0)}</span>
+            {w.tolls > 0 && <span style={{ color: "#a1a1aa" }}>🛣️{w.tolls.toFixed(0)}</span>}
+            <span style={{ marginLeft: "auto", fontWeight: 600, color: net >= 0 ? "#22c55e" : "#ef4444" }}>{net >= 0 ? "+" : ""}{net.toFixed(0)}</span>
+          </div>
+        )
+      })}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 8px", borderRadius: 6, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <span style={{ color: "#a1a1aa", fontWeight: 500, minWidth: 70 }}>Month</span>
+        <span style={{ color: "#22c55e" }}>+{monthAcc.in.toFixed(0)}</span>
+        <span style={{ color: "#ef4444" }}>−{monthAcc.out.toFixed(0)}</span>
+        <span style={{ marginLeft: "auto", fontWeight: 600, color: monthAcc.net >= 0 ? "#22c55e" : "#ef4444" }}>{monthAcc.net >= 0 ? "+" : ""}{monthAcc.net.toFixed(0)}</span>
       </div>
     </div>
   )
