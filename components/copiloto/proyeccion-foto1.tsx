@@ -745,23 +745,25 @@ function WeekCloseBar({ entries }: { entries: any[] }) {
   }, [entries])
 
   return (
-    <div style={{ margin: "8px 14px", padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10 }}>
-        <span style={{ color: "#6b7280", letterSpacing: 0.5 }}>Week {currentWeek.start.slice(5)}–{currentWeek.end.slice(5)}</span>
-        <span style={{ color: "#9ca3af" }}>
-          <span style={{ color: "#4ade80" }}>+${currentWeek.in.toFixed(0)}</span>
-          <span style={{ color: "#f87171", marginLeft: 6 }}>−${currentWeek.out.toFixed(0)}</span>
-          {currentWeek.tolls > 0 && <span style={{ color: "#fbbf24", marginLeft: 6 }}>${currentWeek.tolls.toFixed(0)}</span>}
+    <div style={{ margin: "6px 12px 8px", padding: "6px 0", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", fontSize: 10, lineHeight: 1.4 }}>
+        <span style={{ color: "#52525b", fontWeight: 500, letterSpacing: 0.3 }}>{currentWeek.start.slice(5)}–{currentWeek.end.slice(5)}</span>
+        <span style={{ fontVariantNumeric: "tabular-nums", color: "#71717a" }}>
+          <span style={{ color: "#22c55e" }}>+{currentWeek.in.toFixed(0)}</span>
+          <span style={{ margin: "0 4px", color: "#3f3f46" }}>·</span>
+          <span style={{ color: "#ef4444" }}>−{currentWeek.out.toFixed(0)}</span>
+          {currentWeek.tolls > 0 && <><span style={{ margin: "0 4px", color: "#3f3f46" }}>·</span><span style={{ color: "#a1a1aa" }}>{currentWeek.tolls.toFixed(0)}</span></>}
         </span>
-        <span style={{ fontWeight: 600, color: currentWeek.net >= 0 ? "#4ade80" : "#f87171" }}>{currentWeek.net >= 0 ? "+" : ""}${currentWeek.net.toFixed(0)}</span>
+        <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: currentWeek.net >= 0 ? "#22c55e" : "#ef4444" }}>{currentWeek.net >= 0 ? "+" : ""}{currentWeek.net.toFixed(0)}</span>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, marginTop: 4, paddingTop: 4, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-        <span style={{ color: "#6b7280" }}>Month</span>
-        <span style={{ color: "#9ca3af" }}>
-          <span style={{ color: "#4ade80" }}>+${monthAcc.in.toFixed(0)}</span>
-          <span style={{ color: "#f87171", marginLeft: 6 }}>−${monthAcc.out.toFixed(0)}</span>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", fontSize: 10, lineHeight: 1.4, marginTop: 2 }}>
+        <span style={{ color: "#52525b", fontWeight: 500 }}>Month</span>
+        <span style={{ fontVariantNumeric: "tabular-nums", color: "#71717a" }}>
+          <span style={{ color: "#22c55e" }}>+{monthAcc.in.toFixed(0)}</span>
+          <span style={{ margin: "0 4px", color: "#3f3f46" }}>·</span>
+          <span style={{ color: "#ef4444" }}>−{monthAcc.out.toFixed(0)}</span>
         </span>
-        <span style={{ fontWeight: 600, color: monthAcc.net >= 0 ? "#4ade80" : "#f87171" }}>{monthAcc.net >= 0 ? "+" : ""}${monthAcc.net.toFixed(0)}</span>
+        <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums", color: monthAcc.net >= 0 ? "#22c55e" : "#ef4444" }}>{monthAcc.net >= 0 ? "+" : ""}{monthAcc.net.toFixed(0)}</span>
       </div>
     </div>
   )
