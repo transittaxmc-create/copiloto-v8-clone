@@ -1465,11 +1465,10 @@ function WeekCloseSummary({ entries }: { entries: CashFlowEntry[] }) {
     return { in: inM, out: outM, net: inM - outM }
   }, [entries])
 
-  if (weeks.length === 0) return null
-
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
       <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-neutral-500">Week close · Mon–Sun</p>
+      {weeks.length === 0 && <p className="text-[11px] text-neutral-500">No closed weeks yet</p>}
       {weeks.map((w) => {
         const net = w.in - w.out
         return (
