@@ -947,6 +947,9 @@ export function DineroProyeccion(props: {
       )}
 
 
+      {/* Week close summary — one line per closed week (Mon–Sun) */}
+      <WeekCloseSummary entries={props.entries} />
+
       {/* Projected register — columnas estilo Register, un día por fila, scroll hasta 90 days. */}
       <ProjectionRegister
         fc={fc}
@@ -1422,3 +1425,79 @@ function FootNotes({ fc }: { fc: Forecast }) {
   )
 }
 
+function WeekCloseSummary({ entries }: { entries: CashFlowEntry[] }) {
+  const weeks = useMemo(() => {
+    const byWeek = new Map<string, { in: number; out: number; tolls: number; start: string; end: string }>()
+    for (const e of entries) {
+      if (e.status !== "actual") continue
+      const d = e.date
+      if (!d) continue
+      const dt = new Date(d + "T12:00:00")
+      const day = dt.getDay()
+      const monday = new Date(dt)
+      monday.setDate(dt.getDate() - ((day + 6) % 7))
+      const sunday = new Date(monday)
+      sunday.setDate(monday.getDate() + 6)
+      const key = monday.toISOString().slice(0, 10)
+      const end = sunday.toISOString().slice(0, 10)
+      if (!byWeek.has(key)) byWeek.set(key, { in: 0, out: 0, tolls: 0, start: key, end })
+      const w = byWeek.get(key)!
+      const amt = Math.abs(e.amount)
+      if (e.type === "inflow") w.in += amt
+      else if (e.type === "outflow") {
+        w.out += amt
+        if ((e.category || "").toLowerCase().includes("toll")) w.tolls += amt
+      }
+    }
+    return [...byWeek.values()].sort((a, b) => b.start.localeCompare(a.start)).slice(0, 4)
+  }, [entries])
+
+  const monthAcc = useMemo(() => {
+    const now = new Date()
+    const ym = now.toISOString().slice(0, 7)
+    let inM = 0, outM = 0
+    for (const e of entries) {
+      if (e.status !== "actual" || !e.date?.startsWith(ym)) continue
+      const amt = Math.abs(e.amount)
+      if (e.type === "inflow") inM += amt
+      else if (e.type === "outflow") outM += amt
+    }
+    return { in: inM, out: outM, net: inM - outM }
+  }, [entries])
+
+  if (weeks.length === 0) return null
+
+  return (
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-3">
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-neutral-500">Week close · Mon–Sun</p>
+      {weeks.map((w) => {
+        const net = w.in - w.out
+        return (
+          <div key={w.start} className="flex items-center justify-between border-b border-neutral-800/50 py-1.5 text-[11px] last:border-0">
+            <span className="text-neutral-400">
+              {w.start.slice(5)} – {w.end.slice(5)}
+            </span>
+            <span className="flex gap-2">
+              <span className="text-emerald-400">IN ${w.in.toFixed(0)}</span>
+              <span className="text-rose-400">OUT ${w.out.toFixed(0)}</span>
+              {w.tolls > 0 && <span className="text-amber-400">🛣️ ${w.tolls.toFixed(0)}</span>}
+            </span>
+            <span className={cn("font-bold", net >= 0 ? "text-emerald-400" : "text-rose-400")}>
+              {net >= 0 ? "+" : ""}${net.toFixed(0)}
+            </span>
+          </div>
+        )
+      })}
+      <div className="mt-2 flex items-center justify-between border-t border-neutral-700 pt-2 text-[11px]">
+        <span className="font-bold text-neutral-300">Month to date</span>
+        <span className="flex gap-2">
+          <span className="text-emerald-400">IN ${monthAcc.in.toFixed(0)}</span>
+          <span className="text-rose-400">OUT ${monthAcc.out.toFixed(0)}</span>
+        </span>
+        <span className={cn("font-bold", monthAcc.net >= 0 ? "text-emerald-400" : "text-rose-400")}>
+          {monthAcc.net >= 0 ? "+" : ""}${monthAcc.net.toFixed(0)}
+        </span>
+      </div>
+    </div>
+  )
+}
